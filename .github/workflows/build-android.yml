@@ -21,26 +21,19 @@ jobs:
         with:
           channel: 'stable'
 
-      - name: Fix Flutter SDK path & AGP version
+      - name: Repair Android project & Flutter SDK path
         run: |
+          flutter create --platforms=android --org com.huangguo --project-name huangguo_vip .
           python3 -c '
           import os, re
-          settings_path = "android/settings.gradle"
-          with open(settings_path, "r", encoding="utf-8") as f:
-              s = f.read()
-          flutter_gradle = os.path.join(os.environ["FLUTTER_ROOT"], "packages", "flutter_tools", "gradle")
-          s = re.sub(r"includeBuild\([\"'\''][^\"'\'']*flutter_tools/gradle[\"'\'']\)", f"includeBuild(\x27{flutter_gradle}\x27)", s)
-          s = re.sub(r"(id\s+[\"'\'']com\.android\.application[\"'\'']\s+version\s+[\"'\''])[^\"'\'']+([\"'\''])", r"\g<1>8.6.0\g<2>", s)
-          with open(settings_path, "w", encoding="utf-8") as f:
-              f.write(s)
-
-          wrapper_path = "android/gradle/wrapper/gradle-wrapper.properties"
-          if os.path.exists(wrapper_path):
-              with open(wrapper_path, "r", encoding="utf-8") as f:
-                  w = f.read()
-              w = re.sub(r"gradle-[0-9.]+-(all|bin)\.zip", r"gradle-8.7-\1.zip", w)
-              with open(wrapper_path, "w", encoding="utf-8") as f:
-                  f.write(w)
+          path = "android/settings.gradle"
+          if os.path.exists(path):
+              with open(path, "r", encoding="utf-8") as f:
+                  s = f.read()
+              flutter_gradle = os.path.join(os.environ["FLUTTER_ROOT"], "packages", "flutter_tools", "gradle")
+              s = re.sub(r"includeBuild\([\"'\''][^\"'\'']*flutter_tools/gradle[\"'\'']\)", f"includeBuild(\x27{flutter_gradle}\x27)", s)
+              with open(path, "w", encoding="utf-8") as f:
+                  f.write(s)
           '
 
       - name: Install dependencies
